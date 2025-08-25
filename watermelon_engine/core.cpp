@@ -80,6 +80,8 @@ void Engine::initialize(std::string title, int width, int height)
     SDL_Log("GL Renderer: %s", (const char*)glGetString(GL_RENDERER));
     SDL_Log("GL Version: %s", (const char*)glGetString(GL_VERSION));
 
+    glEnable(GL_DEPTH_TEST);
+
     glViewport(0, 0, screenWidth, screenHeight);
 }
 

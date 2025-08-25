@@ -12,7 +12,8 @@ add_library(
     utils.hpp utils.cpp
 )
 
-target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad)
+target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad glm::glm)
 target_include_directories(WatermelonEngine PUBLIC ${CMAKE_SOURCE_DIR})
 
 file(COPY ${CMAKE_SOURCE_DIR}/SDL3.dll DESTINATION ${CMAKE_BINARY_DIR}/testgame/)
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/testgame/)
