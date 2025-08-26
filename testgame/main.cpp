@@ -23,7 +23,7 @@ glm::vec3 cubePositions[] = {
     glm::vec3(130.f,  160.f, 0.f)  
 };
 
-float indices[] = {
+unsigned int indices[] = {
     0, 1, 3,
     1, 2, 3
 };
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     // -----------------------
 
     Shader defaultShader("assets/shaders/default.vert", "assets/shaders/default.frag");
-    Texture texture("assets/sprites/Exit.png");
+    Texture texture("assets/sprites/MainMenuArt.png");
 
     Camera camera(1280, 720);
 
@@ -95,16 +95,11 @@ int main(int argc, char** argv) {
         // Rendering
         glClearColor(.2f, .3f, .3f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        glm::mat4 projection;
-        projection = glm::ortho(0.f, (float)1280, (float)720, 0.f, 1000.f, -1000.f);
-        projection = glm::scale(projection, glm::vec3{ 1.f, 1.f, 1.f });
-        glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         glBindTexture(GL_TEXTURE_2D, texture.getId());
         defaultShader.use();
-        // glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, glm::value_ptr(camera.getProjectionMatrix()));
-        // glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+        glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, glm::value_ptr(camera.getProjectionMatrix()));
+        glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 
         glBindVertexArray(VAO);
 
@@ -135,6 +130,7 @@ int main(int argc, char** argv) {
             glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(model));
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
         // Present

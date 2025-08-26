@@ -15,6 +15,6 @@ uniform mat4 projection;
 
 void main() {
     vec2 pixelPos = aPos.xy * sourceSize - origin;
-    gl_Position = projection * model * vec4(pixelPos, aPos.z, 1.0);
+    gl_Position = projection * view * model * vec4(pixelPos, aPos.z, 1.0);
     TexCoord = mix(sourceMinUV, sourceMaxUV, aTexCoord);
 }
