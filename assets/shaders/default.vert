@@ -4,17 +4,16 @@ layout (location = 1) in vec2 aTexCoord;
 
 out vec2 TexCoord;
 
-uniform vec2 origin;
-uniform vec2 sourceMinUV;
-uniform vec2 sourceMaxUV;
-uniform vec2 sourceSize;
+uniform vec2 uv0;
+uniform vec2 uv1;
+uniform vec2 uvSize;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main() {
-    vec2 pixelPos = aPos.xy * sourceSize - origin;
+    vec2 pixelPos = aPos.xy * uvSize;
     gl_Position = projection * view * model * vec4(pixelPos, aPos.z, 1.0);
-    TexCoord = mix(sourceMinUV, sourceMaxUV, aTexCoord);
+    TexCoord = mix(uv0, uv1, aTexCoord);
 }

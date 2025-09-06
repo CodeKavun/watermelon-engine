@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "gfx.hpp"
 
 std::string Engine::windowTitle;
 int Engine::screenWidth = 800;
@@ -7,11 +8,19 @@ int Engine::screenHeight = 600;
 SDL_Window* Engine::window = nullptr;
 SDL_GLContext Engine::glContext;
 
+float Engine::currentTime = 0;
+float Engine::lastTime;
+float Engine::deltaTime;
+
+bool Engine::running = false;
+
 void Engine::initialize(std::string title, int width, int height)
 {
     windowTitle = title;
     screenWidth = width;
     screenHeight = height;
+
+    running = true;
 
     // Init SDL
     SDL_Log("Initializing the engine...");
@@ -29,7 +38,7 @@ void Engine::initialize(std::string title, int width, int height)
     
     // Creating window
     SDL_Log("Creating the window...");
-    window = SDL_CreateWindow(windowTitle.c_str(), screenWidth, screenHeight, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow(windowTitle.c_str(), screenWidth, screenHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!window) {
         SDL_Log("Failed to create the window! Error message: %s", SDL_GetError());
         SDL_Log("Shutting down the engine...");
@@ -81,8 +90,33 @@ void Engine::initialize(std::string title, int width, int height)
     SDL_Log("GL Version: %s", (const char*)glGetString(GL_VERSION));
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     glViewport(0, 0, screenWidth, screenHeight);
+}
+
+void Engine::update()
+{
+    lastTime = currentTime;
+    currentTime = SDL_GetTicks() / 1000.f;
+    deltaTime = currentTime - lastTime;
+
+    ObjectDrawer::bindVertexArray();
+}
+
+void Engine::input(SDL_Event &event)
+{
+    switch (event.type) {
+        case SDL_EVENT_QUIT: {
+            running = false;
+            break;
+        }
+        case SDL_EVENT_WINDOW_RESIZED: {
+            setScreenSize(event.window.data1, event.window.data2);
+            glViewport(0, 0, screenWidth, screenHeight);
+            break;
+        }
+    }
 }
 
 void Engine::close()
