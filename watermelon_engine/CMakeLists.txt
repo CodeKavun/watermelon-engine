@@ -10,6 +10,8 @@ add_library(
     core.hpp core.cpp
     gfx.hpp gfx.cpp
     utils.hpp utils.cpp
+    engine_types.hpp
+    input.hpp input.cpp
 )
 
 target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad glm::glm)

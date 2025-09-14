@@ -8,13 +8,14 @@ int Engine::screenHeight = 600;
 SDL_Window* Engine::window = nullptr;
 SDL_GLContext Engine::glContext;
 
-float Engine::currentTime = 0;
-float Engine::lastTime;
-float Engine::deltaTime;
+Uint64 Engine::currentTime = 0;
+Uint64 Engine::lastTime = 0;
+double Engine::deltaTime = 0;
+std::deque<double> Engine::deltaSamples;
 
 bool Engine::running = false;
 
-void Engine::initialize(std::string title, int width, int height)
+void Engine::initialize(std::string title, int width, int height, bool fullscreen)
 {
     windowTitle = title;
     screenWidth = width;
@@ -22,9 +23,12 @@ void Engine::initialize(std::string title, int width, int height)
 
     running = true;
 
+    currentTime = SDL_GetPerformanceCounter();
+    lastTime = 0;
+
     // Init SDL
     SDL_Log("Initializing the engine...");
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("Failed to initialize the engine! Error message: %s", SDL_GetError());
         SDL_Log("Shutting down the engine...");
         SDL_Quit();
@@ -46,6 +50,8 @@ void Engine::initialize(std::string title, int width, int height)
         return;
     }
     SDL_Log("Window has been created!");
+
+    if (fullscreen) SDL_SetWindowFullscreen(window, fullscreen);
     
     // Create GL context
     SDL_Log("Creating GL context...");
@@ -97,9 +103,12 @@ void Engine::initialize(std::string title, int width, int height)
 
 void Engine::update()
 {
+    InputHandler::update();
+
     lastTime = currentTime;
-    currentTime = SDL_GetTicks() / 1000.f;
-    deltaTime = currentTime - lastTime;
+    currentTime = SDL_GetPerformanceCounter();
+    deltaTime = (double)((currentTime - lastTime) * 1000.f) / (double)SDL_GetPerformanceFrequency();
+    deltaTime /= 1000.f;
 
     ObjectDrawer::bindVertexArray();
 }
@@ -117,6 +126,8 @@ void Engine::input(SDL_Event &event)
             break;
         }
     }
+
+    InputHandler::checkGamepadConnections(event);
 }
 
 void Engine::close()

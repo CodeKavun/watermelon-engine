@@ -10,3 +10,12 @@ public:
     float getTop() const { return y; }
     float getBottom() const { return y + height; }
 };
+
+class Color
+{
+public:
+    float r, g, b, a;
+
+    Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
+    Color(float r, float g, float b) : Color::Color(r, g, b, 1.f) {}
+};

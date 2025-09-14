@@ -1,0 +1,1 @@
+float normalizeAxis(float axis, float maxValue);

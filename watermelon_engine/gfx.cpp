@@ -1,6 +1,7 @@
 #include "gfx.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "core.hpp"
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
 {
@@ -73,6 +74,21 @@ Texture::Texture(const char *path)
     stbi_image_free(data);
 }
 
+Texture::Texture(unsigned char *data, float width, float height)
+{
+    this->width = width;
+    this->height = height;
+    nrChannels = 4;
+
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+}
+
 void Texture::bind()
 {
     glBindTexture(GL_TEXTURE_2D, id);
@@ -83,6 +99,50 @@ void Texture::clean()
     glDeleteTextures(1, &id);
 }
 
+RenderTarget::RenderTarget(float width, float height)
+    : width(width), height(height)
+{
+    // Generate framebuffer
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+    // Create color texture
+    colorTexture = Texture(nullptr, width, height);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture.getId(), 0);
+
+    // Create depth buffer
+    glGenRenderbuffers(1, &depthRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
+
+    // Unbind
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderTarget::use()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glViewport(0, 0, width, height);
+}
+
+void RenderTarget::unuse()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, Engine::getScreenWidth(), Engine::getScreenHeight());
+}
+
+void RenderTarget::clean()
+{
+    glDeleteFramebuffers(1, &FBO);
+    colorTexture.clean();
+    glDeleteRenderbuffers(1, &depthRBO);
+}
+
+void RenderTarget::draw(Camera &camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin)
+{
+    ObjectDrawer::drawTexture(camera, colorTexture, position, origin, scale, 0.f);
+}
 
 unsigned int ObjectDrawer::VAO;
 unsigned int ObjectDrawer::VBO;
@@ -145,7 +205,13 @@ void ObjectDrawer::clean()
     glDeleteBuffers(1, &EBO);
 }
 
-void ObjectDrawer::drawTexture(Camera& camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* source, bool flipH, bool flipV, Shader& shader, float depth)
+void ObjectDrawer::clearBackground(Color color)
+{
+    glClearColor(color.r, color.g, color.b, color.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle *source, bool flipH, bool flipV, Shader &shader, float depth)
 {
     if (currentTexture != texture) {
         texture.bind();

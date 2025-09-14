@@ -2,6 +2,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
 #include <string>
+#include <deque>
+#include "input.hpp"
+
+#define MAX_DELTA_STEPS 100
 
 class Engine
 {
@@ -13,13 +17,14 @@ private:
     static SDL_Window* window;
     static SDL_GLContext glContext;
 
-    static float currentTime;
-    static float lastTime;
-    static float deltaTime;
+    static Uint64 currentTime;
+    static Uint64 lastTime;
+    static double deltaTime;
+    static std::deque<double> deltaSamples;
 public:
     static bool running;
 
-    static void initialize(std::string title, int width, int height);
+    static void initialize(std::string title, int width, int height, bool fullscreen);
     static void update();
     static void input(SDL_Event& event);
     static void close();
@@ -37,6 +42,18 @@ public:
 
     static SDL_Window* getWindow() { return window; }
 
-    static float getTime() { return currentTime; }
-    static float getDeltaTime() { return deltaTime; }
+    static float getTime() { return SDL_GetTicks() / 1000.f; }
+    static double getDeltaTime() { return deltaTime; }
+    static double getSmoothedDelta() {
+        deltaSamples.push_back(deltaTime);
+
+        if (deltaSamples.size() > MAX_DELTA_STEPS)
+            deltaSamples.pop_front();
+
+        double sum = 0.0;
+        for (double d : deltaSamples)
+            sum += d;
+
+        return sum / deltaSamples.size();
+    }
 };

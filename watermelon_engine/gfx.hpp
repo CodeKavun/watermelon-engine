@@ -72,6 +72,7 @@ private:
 public:
     Texture() = default;
     Texture(const char* path);
+    Texture(unsigned char* data, float width, float height);
 
     inline unsigned int getId() const { return id; }
 
@@ -85,6 +86,31 @@ public:
         return id == other.getId();
     }
 };
+
+class Camera;
+
+class RenderTarget
+{
+private:
+    unsigned int FBO;
+    Texture colorTexture;
+    unsigned int depthRBO;
+
+    float width;
+    float height;
+public:
+    RenderTarget(float width, float height);
+
+    inline float getWidth() const { return width; }
+    inline float getHeight() const { return height; }
+
+    void use();
+    void unuse();
+    void clean();
+
+    void draw(Camera& camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin);
+};
+
 
 class Camera
 {
@@ -143,6 +169,8 @@ public:
     static void initialize();
     static void clean();
     static void bindVertexArray() { glBindVertexArray(VAO); }
+
+    static void clearBackground(Color color);
 
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* soruce, bool flipH, bool flipV, Shader& shader, float depth = 0);
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* soruce, float depth = 0);
