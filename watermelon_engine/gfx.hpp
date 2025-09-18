@@ -62,6 +62,7 @@ public:
     }
 };
 
+
 class Texture
 {
 private:
@@ -76,8 +77,8 @@ public:
 
     inline unsigned int getId() const { return id; }
 
-    inline unsigned int getWidth() const { return width; }
-    inline unsigned int getHeight() const { return height; }
+    inline float getWidth() const { return width; }
+    inline float getHeight() const { return height; }
 
     void bind();
     void clean();
@@ -87,7 +88,30 @@ public:
     }
 };
 
+
+class TextureAtlas
+{
+private:
+    Texture texture;
+    std::vector<Rectangle> regions;
+public:
+    TextureAtlas(Texture texture) : texture(texture) {}
+
+    static TextureAtlas createGrid(Texture texture, int cellWidth, int cellHeight);
+
+    inline Texture& getTexture() { return texture; }
+
+    Rectangle& getRegion(int index) { return regions[index]; }
+    int getRegionCount() { return regions.size(); }
+
+    void addRegion(Rectangle source);
+    void addRegion(float x, float y, float width, float height);
+    void removeRegion(int index);
+};
+
+
 class Camera;
+
 
 class RenderTarget
 {

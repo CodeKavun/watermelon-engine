@@ -3,6 +3,7 @@ class Rectangle
 public:
     float x, y, width, height;
 
+    Rectangle() : x(0), y(0), width(0), height(0) {}
     Rectangle(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {}
 
     float getLeft() const { return x; }

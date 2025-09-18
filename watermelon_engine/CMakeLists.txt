@@ -4,6 +4,7 @@ add_library(glad STATIC vendors/glad/src/gl.c)
 target_include_directories(glad PUBLIC vendors/glad/include)
 
 add_subdirectory(vendors/glm)
+add_subdirectory(vendors/nlohmann_json)
 
 add_library(
     WatermelonEngine
@@ -12,9 +13,11 @@ add_library(
     utils.hpp utils.cpp
     engine_types.hpp
     input.hpp input.cpp
+    sequence.hpp sequence.cpp
+    world.hpp world.cpp
 )
 
-target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad glm::glm)
+target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad glm::glm nlohmann_json::nlohmann_json)
 target_include_directories(WatermelonEngine PUBLIC ${CMAKE_SOURCE_DIR})
 
 file(COPY ${CMAKE_SOURCE_DIR}/SDL3.dll DESTINATION ${CMAKE_BINARY_DIR}/testgame/)

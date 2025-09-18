@@ -290,3 +290,40 @@ void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 posit
 {
     drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, soruce, flipH, flipV, defaultShader, depth);
 }
+
+TextureAtlas TextureAtlas::createGrid(Texture texture, int cellWidth, int cellHeight)
+{
+    int columns = (int)texture.getWidth() / cellWidth;
+    int rows = (int)texture.getHeight() / cellHeight;
+    int count = columns * rows;
+
+    TextureAtlas atlas(texture);
+
+    for (int i = 0; i < count; i++) {
+        Rectangle source = Rectangle{
+            (float)(i % columns * cellWidth),
+            (float)(i / columns * cellHeight),
+            (float)cellWidth,
+            (float)cellHeight
+        };
+
+        atlas.addRegion(source);
+    }
+
+    return atlas;
+}
+
+void TextureAtlas::addRegion(Rectangle source)
+{
+    regions.push_back(source);
+}
+
+void TextureAtlas::addRegion(float x, float y, float width, float height)
+{
+    regions.push_back(Rectangle{ x, y, width, height });
+}
+
+void TextureAtlas::removeRegion(int index)
+{
+    regions.erase(regions.begin() + index);
+}

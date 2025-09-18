@@ -5,7 +5,7 @@
 #include <deque>
 #include "input.hpp"
 
-#define MAX_DELTA_STEPS 100
+#define MAX_DELTA_STEPS 20
 
 class Engine
 {
@@ -19,8 +19,9 @@ private:
 
     static Uint64 currentTime;
     static Uint64 lastTime;
-    static double deltaTime;
-    static std::deque<double> deltaSamples;
+    static float deltaTime;
+    static float smoothedDeltaTime;
+    static std::deque<float> deltaSamples;
 public:
     static bool running;
 
@@ -43,17 +44,6 @@ public:
     static SDL_Window* getWindow() { return window; }
 
     static float getTime() { return SDL_GetTicks() / 1000.f; }
-    static double getDeltaTime() { return deltaTime; }
-    static double getSmoothedDelta() {
-        deltaSamples.push_back(deltaTime);
-
-        if (deltaSamples.size() > MAX_DELTA_STEPS)
-            deltaSamples.pop_front();
-
-        double sum = 0.0;
-        for (double d : deltaSamples)
-            sum += d;
-
-        return sum / deltaSamples.size();
-    }
+    static float getDeltaTime() { return deltaTime; }
+    static float getSmoothedDelta() { return smoothedDeltaTime; }
 };
