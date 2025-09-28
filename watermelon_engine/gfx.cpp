@@ -147,14 +147,20 @@ void RenderTarget::draw(Camera &camera, glm::vec2 position, glm::vec2 scale, glm
 unsigned int ObjectDrawer::VAO;
 unsigned int ObjectDrawer::VBO;
 unsigned int ObjectDrawer::EBO;
+
 Shader ObjectDrawer::defaultShader;
+Shader ObjectDrawer::solidColorShader;
+Shader ObjectDrawer::circleShader;
 
 Texture ObjectDrawer::currentTexture;
-Shader ObjectDrawer::currentShader;
+Shader* ObjectDrawer::currentShader;
 
 void ObjectDrawer::initialize()
 {
     defaultShader = Shader("assets/shaders/default.vert", "assets/shaders/default.frag");
+    solidColorShader = Shader("assets/shaders/shapes/shape.vert", "assets/shaders/shapes/shape.frag");
+    circleShader = Shader("assets/shaders/shapes/shape.vert", "assets/shaders/shapes/circle.frag");
+    currentShader = &defaultShader;
 
     float vertices[] = {
         // positions    // texture coords
@@ -211,7 +217,7 @@ void ObjectDrawer::clearBackground(Color color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle *source, bool flipH, bool flipV, Shader &shader, float depth)
+void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle *source, bool flipH, bool flipV, Shader *shader, float depth)
 {
     if (currentTexture != texture) {
         texture.bind();
@@ -219,12 +225,18 @@ void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 posit
     }
 
     if (currentShader != shader) {
-        shader.use();
-        currentShader = shader;
+        if (!shader) {
+            currentShader = &defaultShader;
+            currentShader->use();
+        }
+        else {
+            currentShader = shader;
+            currentShader->use();
+        }
     }
 
-    shader.setMat4Uniform("projection", camera.getProjectionMatrix());
-    shader.setMat4Uniform("view", camera.getViewMatrix());
+    currentShader->setMat4Uniform("projection", camera.getProjectionMatrix());
+    currentShader->setMat4Uniform("view", camera.getViewMatrix());
 
     // Source of texture
     glm::vec2 sourceSize;
@@ -235,12 +247,12 @@ void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 posit
         sourceSize = glm::vec2{ source->width, source->height };
 
         uv0 = glm::vec2{
-            source->x / texture.getWidth(),
-            1.f - source->height / texture.getHeight()
+            source->getLeft() / texture.getWidth(),
+            1.f - source->getBottom() / texture.getHeight()
         };
         uv1 = glm::vec2{
-            source->width / texture.getWidth(),
-            1.f - source->y / texture.getHeight()
+            source->getRight() / texture.getWidth(),
+            1.f - source->getTop() / texture.getHeight()
         };
     }
     else {
@@ -257,10 +269,11 @@ void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 posit
     model = glm::scale(model, glm::vec3{ scale, 1.f });
 
     // Apply to a shader
-    shader.setVec2Uniform("uv0", uv0);
-    shader.setVec2Uniform("uv1", uv1);
-    shader.setVec2Uniform("uvSize", sourceSize);
-    shader.setMat4Uniform("model", model);
+    currentShader->setVec2Uniform("uv0", uv0);
+    currentShader->setVec2Uniform("uv1", uv1);
+    currentShader->setVec2Uniform("uvSize", sourceSize);
+    currentShader->setVec4Uniform("color", glm::vec4{ 1, 1, 1, 1 });
+    currentShader->setMat4Uniform("model", model);
 
     // Draw a texture
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -268,27 +281,67 @@ void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 posit
 
 void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle *soruce, float depth)
 {
-    drawTexture(camera, texture, position, origin, scale, rotation, soruce, false, false, defaultShader, depth);
+    drawTexture(camera, texture, position, origin, scale, rotation, soruce, false, false, nullptr, depth);
 }
 
 void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, float depth)
 {
-    drawTexture(camera, texture, position, origin, scale, rotation, nullptr, false, false, defaultShader, depth);
+    drawTexture(camera, texture, position, origin, scale, rotation, nullptr, false, false, nullptr, depth);
 }
 
 void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, float depth)
 {
-    drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, nullptr, false, false, defaultShader, depth);
+    drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, nullptr, false, false, nullptr, depth);
 }
 
-void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, Rectangle *soruce, Shader &shader, float depth)
+void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, Rectangle *soruce, Shader *shader, float depth)
 {
     drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, soruce, false, false, shader, depth);
 }
 
 void ObjectDrawer::drawTexture(Camera &camera, Texture &texture, glm::vec2 position, Rectangle *soruce, bool flipH, bool flipV, float depth)
 {
-    drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, soruce, flipH, flipV, defaultShader, depth);
+    drawTexture(camera, texture, position, glm::vec2{ 0, 0 }, glm::vec2{ 1, 1 }, 0.f, soruce, flipH, flipV, nullptr, depth);
+}
+
+void ObjectDrawer::drawRectangle(Camera &camera, Rectangle rectangle, Color color, float layerDepth)
+{
+    if (currentShader != &solidColorShader) {
+        currentShader = &solidColorShader;
+        currentShader->use();
+    }
+
+    currentShader->setMat4Uniform("projection", camera.getProjectionMatrix());
+    currentShader->setMat4Uniform("view", camera.getViewMatrix());
+    
+    glm::mat4 model(1.f);
+    model = glm::translate(model, glm::vec3{ rectangle.x, rectangle.y, layerDepth });
+    model = glm::scale(model, glm::vec3{ rectangle.width, rectangle.height, 1.f });
+
+    currentShader->setMat4Uniform("model", model);
+    currentShader->setVec4Uniform("color", color.toVec4());
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void ObjectDrawer::drawCircle(Camera &camera, glm::vec2 position, float radius, Color color, float layerDepth)
+{
+    if (currentShader != &circleShader) {
+        currentShader = &circleShader;
+        currentShader->use();
+    }
+
+    currentShader->setMat4Uniform("projection", camera.getProjectionMatrix());
+    currentShader->setMat4Uniform("view", camera.getViewMatrix());
+    
+    glm::mat4 model(1.f);
+    model = glm::translate(model, glm::vec3{ position - radius / 2, layerDepth });
+    model = glm::scale(model, glm::vec3{ radius, radius, 1.f });
+
+    currentShader->setMat4Uniform("model", model);
+    currentShader->setVec4Uniform("color", color.toVec4());
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 TextureAtlas TextureAtlas::createGrid(Texture texture, int cellWidth, int cellHeight)

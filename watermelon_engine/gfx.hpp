@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -50,6 +51,11 @@ public:
     void setVec3Uniform(const std::string& name, const glm::vec3& value) {
         cacheParameterLocation(name);
         glUniform3fv(uniformLocations[name], 1, glm::value_ptr(value));
+    }
+
+    void setVec4Uniform(const std::string& name, const glm::vec4& value) {
+        cacheParameterLocation(name);
+        glUniform4fv(uniformLocations[name], 1, glm::value_ptr(value));
     }
 
     void setMat4Uniform(const std::string& name, const glm::mat4& value) {
@@ -185,10 +191,13 @@ private:
     static unsigned int VAO;
     static unsigned int VBO;
     static unsigned int EBO;
+
     static Shader defaultShader;
+    static Shader solidColorShader;
+    static Shader circleShader;
 
     static Texture currentTexture;
-    static Shader currentShader;
+    static Shader* currentShader;
 public:
     static void initialize();
     static void clean();
@@ -196,10 +205,16 @@ public:
 
     static void clearBackground(Color color);
 
-    static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* soruce, bool flipH, bool flipV, Shader& shader, float depth = 0);
+    static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* soruce, bool flipH, bool flipV, Shader* shader, float depth = 0);
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, Rectangle* soruce, float depth = 0);
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, glm::vec2 origin, glm::vec2 scale, float rotation, float depth = 0);
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, float depth = 0);
-    static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, Rectangle* soruce, Shader& shader, float depth = 0);
+    static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, Rectangle* soruce, Shader* shader, float depth = 0);
     static void drawTexture(Camera& camera, Texture& texture, glm::vec2 position, Rectangle* soruce, bool flipH, bool flipV, float depth = 0);
+
+    static void drawRectangle(Camera& camera, Rectangle rectangle, Color color, float layerDepth = 0.f);
+    static void drawRectangleOutline(Camera& camera, Rectangle rectangle, Color color, float thickness = 1.f, float layerDepth = 0.f);
+    static void drawLine(Camera& camera, glm::vec2 point1, glm::vec2 point2, Color color, float thickness = 1.f, float layerDepth = 0.f);
+    static void drawCircle(Camera& camera, glm::vec2 position, float radius, Color color, float layerDepth = 0.f);
+    
 };

@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -65,7 +66,7 @@ public:
 	void play(std::string name, bool repeat);
 	void stop();
 	void update(float delta);
-	void draw(Camera& camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin, float rotation, Shader& shader, float layerDepth = 0, bool flipX = false, bool flipY = false);
+	void draw(Camera& camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin, float rotation, Shader* shader, float layerDepth = 0, bool flipX = false, bool flipY = false);
 
 private:
 	std::string animFile;

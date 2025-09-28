@@ -15,6 +15,7 @@ add_library(
     input.hpp input.cpp
     sequence.hpp sequence.cpp
     world.hpp world.cpp
+    physics.hpp physics.cpp
 )
 
 target_link_libraries(WatermelonEngine PUBLIC opengl32 SDL3::SDL3 glad glm::glm nlohmann_json::nlohmann_json)

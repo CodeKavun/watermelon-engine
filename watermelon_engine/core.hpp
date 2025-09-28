@@ -1,3 +1,4 @@
+#pragma once
 #include <glad/gl.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
@@ -5,7 +6,7 @@
 #include <deque>
 #include "input.hpp"
 
-#define MAX_DELTA_STEPS 20
+#define SMOOTHING .15f
 
 class Engine
 {
@@ -19,9 +20,8 @@ private:
 
     static Uint64 currentTime;
     static Uint64 lastTime;
-    static float deltaTime;
-    static float smoothedDeltaTime;
-    static std::deque<float> deltaSamples;
+    static double deltaTime;
+    static double smoothedDeltaTime;
 public:
     static bool running;
 
@@ -44,6 +44,6 @@ public:
     static SDL_Window* getWindow() { return window; }
 
     static float getTime() { return SDL_GetTicks() / 1000.f; }
-    static float getDeltaTime() { return deltaTime; }
-    static float getSmoothedDelta() { return smoothedDeltaTime; }
+    static double getDeltaTime() { return deltaTime; }
+    static double getSmoothedDelta() { return smoothedDeltaTime; }
 };

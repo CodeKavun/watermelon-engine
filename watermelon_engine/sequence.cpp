@@ -49,13 +49,14 @@ AnimationPlayer::AnimationPlayer(std::string animFile)
 	{
 	case ORDINAR:
 	{
-		this->texturePath = textureDir + (std::string)jsonData["texture"];
+		this->texturePath = (std::string)jsonData["texture"];
 		this->texture = AssetManager::loadTexture(this->texturePath);
 
 		int regionWidth = jsonData["width"];
 		int regionHeight = jsonData["height"];
 
 		TextureAtlas atlas = TextureAtlas::createGrid(texture, regionWidth, regionHeight);
+		// printf("%d\n", atlas.getRegionCount());
 
 		for (auto& anim : jsonData["animations"].items()) {
 			std::vector<AnimationFrame*> frames;
@@ -175,7 +176,7 @@ void AnimationPlayer::update(float delta)
 	}
 }
 
-void AnimationPlayer::draw(Camera& camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin, float rotation, Shader& shader, float layerDepth, bool flipX, bool flipY)
+void AnimationPlayer::draw(Camera& camera, glm::vec2 position, glm::vec2 scale, glm::vec2 origin, float rotation, Shader* shader, float layerDepth, bool flipX, bool flipY)
 {
 	if (getCurrentAnimation() == nullptr || getCurrentFrame() == nullptr) {
 		ObjectDrawer::drawTexture(camera, texture, position, origin, scale, rotation, nullptr, flipX, flipY, shader, layerDepth);

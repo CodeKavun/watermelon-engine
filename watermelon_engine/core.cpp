@@ -10,9 +10,8 @@ SDL_GLContext Engine::glContext;
 
 Uint64 Engine::currentTime = 0;
 Uint64 Engine::lastTime = 0;
-float Engine::deltaTime = 0;
-float Engine::smoothedDeltaTime = 0;
-std::deque<float> Engine::deltaSamples;
+double Engine::deltaTime = 0;
+double Engine::smoothedDeltaTime = .016f;
 
 bool Engine::running = false;
 
@@ -108,19 +107,8 @@ void Engine::update()
 
     lastTime = currentTime;
     currentTime = SDL_GetPerformanceCounter();
-    deltaTime = (double)((currentTime - lastTime) * 1000.f) / (double)SDL_GetPerformanceFrequency();
-    deltaTime /= 1000.f;
-
-    // Get smoothed delta
-    deltaSamples.push_back(deltaTime);
-    if (deltaSamples.size() > MAX_DELTA_STEPS) deltaSamples.pop_front();
-
-    float sum = 0.0;
-    for (float d : deltaSamples)
-        sum += d;
-
-    smoothedDeltaTime = sum / deltaSamples.size();
-    // -------------------
+    deltaTime = (double)(currentTime - lastTime) / (double)SDL_GetPerformanceFrequency();
+    smoothedDeltaTime = smoothedDeltaTime * (1.f - SMOOTHING) + deltaTime * SMOOTHING;
 
     ObjectDrawer::bindVertexArray();
 }
