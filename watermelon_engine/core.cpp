@@ -1,5 +1,4 @@
 #include "core.hpp"
-#include "gfx.hpp"
 
 std::string Engine::windowTitle;
 int Engine::screenWidth = 800;
@@ -138,4 +137,45 @@ void Engine::close()
     SDL_DestroyWindow(window);
     SDL_Quit();
     return;
+}
+
+void Game::initialize()
+{
+    Engine::initialize(title, screenWidth, screenHeight, fullscreen);
+    ObjectDrawer::initialize();
+
+    globalView = Camera(screenWidth, screenHeight);
+}
+
+void Game::run()
+{
+    initialize();
+
+    while (Engine::running) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            Engine::input(event);
+            input(event);
+        }
+
+        Engine::update();
+        
+        globalView.setWidth(Engine::getScreenWidth());
+        globalView.setHeight(Engine::getScreenHeight());
+        
+        physicsUpdate((float)Engine::getDeltaTime());
+
+        update((float)Engine::getDeltaTime());
+        
+        draw();
+        SDL_GL_SwapWindow(Engine::getWindow());
+    }
+
+    quit();
+}
+
+void Game::quit()
+{
+    ObjectDrawer::clean();
+    Engine::close();
 }

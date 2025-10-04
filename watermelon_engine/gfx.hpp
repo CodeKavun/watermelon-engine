@@ -129,6 +129,7 @@ private:
     float width;
     float height;
 public:
+    RenderTarget() = default;
     RenderTarget(float width, float height);
 
     inline float getWidth() const { return width; }
@@ -151,6 +152,7 @@ private:
     float zoom = 1.f;
     float width, height;
 public:
+    Camera() = default;
     Camera(float width, float height) : width(width), height(height) {}
 
     inline glm::vec2 getPosition() const { return -position; }

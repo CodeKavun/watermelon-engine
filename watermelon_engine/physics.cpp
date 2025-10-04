@@ -10,6 +10,9 @@ bool AABB::rayVsAABB(const glm::vec2 &rayOrigin, const glm::vec2 &rayDir, glm::v
     glm::vec2 tNear = (position - rayOrigin) / rayDir;
     glm::vec2 tFar = (position + size - rayOrigin) / rayDir;
 
+    if (std::isnan(tFar.x) || std::isnan(tFar.y)) return false;
+    if (std::isnan(tNear.x) || std::isnan(tNear.y)) return false;
+
     if (tNear.x > tFar.x) std::swap(tNear.x, tFar.x);
     if (tNear.y > tFar.y) std::swap(tNear.y, tFar.y);
 
@@ -38,7 +41,7 @@ bool AABB::AABBvsAABB(const AABB &other, glm::vec2 &point, glm::vec2 &normal, gl
 
     AABB expandedAABB(other.getPosition() - size / 2.f, other.getSize() + size);
     if (expandedAABB.rayVsAABB(position + size / 2.f, velocity * delta, point, normal, time)) {
-        return time >= -0.001f && time < 1.f;
+        return time >= -0.01f && time < 1.f;
     }
 
     return false;

@@ -5,6 +5,7 @@
 #include <string>
 #include <deque>
 #include "input.hpp"
+#include "gfx.hpp"
 
 #define SMOOTHING .15f
 
@@ -46,4 +47,28 @@ public:
     static float getTime() { return SDL_GetTicks() / 1000.f; }
     static double getDeltaTime() { return deltaTime; }
     static double getSmoothedDelta() { return smoothedDeltaTime; }
+};
+
+
+class Game
+{
+protected:
+    std::string title = "Watermelon Engine";
+
+    int screenWidth = 800;
+    int screenHeight = 600;
+    bool fullscreen = false;
+
+    Camera globalView;
+public:
+    Game() {}
+
+    virtual void initialize();
+    void run();
+    void quit();
+
+    virtual void input(SDL_Event& event) {};
+    virtual void physicsUpdate(float fixedDelta) {};
+    virtual void update(float delta) {}
+    virtual void draw() {};
 };
