@@ -6,7 +6,7 @@ bool AABB::intersects(const AABB &other) const
 }
 
 bool AABB::rayVsAABB(const glm::vec2 &rayOrigin, const glm::vec2 &rayDir, glm::vec2 &point, glm::vec2 &normal, float &tHitNear)
-{ 
+{
     glm::vec2 tNear = (position - rayOrigin) / rayDir;
     glm::vec2 tFar = (position + size - rayOrigin) / rayDir;
 
@@ -36,15 +36,15 @@ bool AABB::AABBvsAABB(const AABB &other, glm::vec2 &point, glm::vec2 &normal, gl
 {
     if (velocity.x == 0.f && velocity.y == 0.f) return false;
 
-    AABB expandedAABB(position - other.getSize() / 2.f, size + other.getSize());
-    if (expandedAABB.rayVsAABB(other.getPosition() + other.getSize() / 2.f, velocity * delta, point, normal, time) && time <= 1.f) {
-        return true;
+    AABB expandedAABB(other.getPosition() - size / 2.f, other.getSize() + size);
+    if (expandedAABB.rayVsAABB(position + size / 2.f, velocity * delta, point, normal, time)) {
+        return time >= -0.001f && time < 1.f;
     }
 
     return false;
 }
 
-float AABB::check(const AABB &other, glm::vec2 &normal, glm::vec2 &velocity) const
+float AABB::check(const AABB &other, glm::vec2 &normal, glm::vec2 &velocity)
 {
     float xInvEntry, yInvEntry, xInvExit, yInvExit;
 

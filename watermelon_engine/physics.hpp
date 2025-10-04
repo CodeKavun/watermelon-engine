@@ -32,7 +32,7 @@ public:
     bool rayVsAABB(const glm::vec2& rayOrigin, const glm::vec2& rayDir, glm::vec2& point, glm::vec2& normal, float& tHitNear);
     bool AABBvsAABB(const AABB& other, glm::vec2& point, glm::vec2& normal, glm::vec2& velocity, float& time, float delta);
 
-    float check(const AABB& other, glm::vec2& normal, glm::vec2& velocity) const;
+    float check(const AABB& other, glm::vec2& normal, glm::vec2& velocity);
 
     AABB getBroadphaseBox(const glm::vec2& velocity) const;
 };
